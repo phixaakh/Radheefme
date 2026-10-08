@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="dv" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ދިވެހި ރަދީފު PDF Generator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- jsPDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Google Font for UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thaana:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans Thaana', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white shadow-xl rounded-2xl p-8 max-w-md w-full text-center border border-slate-200">
+        <h1 class="text-2xl font-bold text-slate-800 mb-2">ރަދީފު PDF އެކްސްޓרק</h1>
+        <p class="text-slate-600 text-sm mb-6">Test generating a Dhivehi dictionary PDF extract directly in your browser.</p>
+
+        <div id="statusBox" class="hidden bg-blue-50 text-blue-700 p-3 rounded-xl mb-4 text-xs font-medium">
+            Ready...
+        </div>
+
+        <button id="extractBtn" onclick="testAndGeneratePDF()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition shadow-md cursor-pointer">
+            Test & Download PDF
+        </button>
+    </div>
+
+    <script>
+        async function testAndGeneratePDF() {
+            const btn = document.getElementById('extractBtn');
+            const statusBox = document.getElementById('statusBox');
+            
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            statusBox.classList.remove('hidden');
+            statusBox.innerText = "Loading sample dictionary database...";
+
+            try {
+                // Simulating dictionary records (Replace or expand with live radheef.mv fetch logic if CORS allows)
+                const dictionaryData = [
+                    { word: "ހورا", meaning: "ތަފާތު ވައްތަރެއްގެ މަހެއް." },
+                    { word: "ހަނދު", meaning: "ދުނިޔޭގެ ވަށައިގެން ދަތުރުކުރާ ގުދުރަތީ ހުދު ކުލައިގެ ހަށިގަނޑެއް." },
+                    { word: "ރަދީފު", meaning: "ބަސްތަކުގެ މާނަ ބަޔانކޮށްދޭ ފޮތް ނުވަތަ ނިޒާމު." },
+                    { word: "ދިވެހި", meaning: "ދިވެހިރާއްޖޭގެ ރައްޔިތުން މުއާމަލާތްކުރާ ބަސް." }
+                ];
+
+                statusBox.innerText = "Initializing jsPDF configuration...";
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                // Note: For full production deployment with custom TTF Thaana fonts (like Faruma/NotoSansThaana),
+                // convert the .ttf file to Base64 and add it using doc.addFileToVFS().
+                // For this quick test, we structure the PDF layout layout correctly for RTL text direction:
+                
+                doc.setFont("Helvetica"); // Fallback layout wrapper
+                doc.setFontSize(18);
+                doc.text("Dhivehi Radheef Extract", 105, 20, { align: "center" });
+                
+                let y = 35;
+                doc.setFontSize(12);
+
+                dictionaryData.forEach((item, index) => {
+                    if (y > 270) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                    // Writing sample entry line
+                    doc.text(`${index + 1}. [ ${item.word} ] : ${item.meaning}`, 190, y, { align: "right" });
+                    y += 12;
+                });
+
+                statusBox.innerText = "PDF successfully generated!";
+                statusBox.className = "bg-emerald-50 text-emerald-700 p-3 rounded-xl mb-4 text-xs font-medium";
+                
+                doc.save("radheef-sample.pdf");
+
+            } catch (error) {
+                statusBox.innerText = "Error: " + error.message;
+                statusBox.className = "bg-rose-50 text-rose-700 p-3 rounded-xl mb-4 text-xs font-medium";
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+    </script>
+</body>
+</html>
